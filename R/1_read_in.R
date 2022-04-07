@@ -28,7 +28,8 @@ content_tidy <- unnest_tokens(contentDT,
                               to_lower = F)
 
 ## create table of all words
-content_table <- as.data.table(table(content_tidy,
+content_tableDT <- as.data.table(table(content_tidy,
                                      dnn = "word"))[
   order(-N, word)
 ]
+saveRDS(content_tableDT, file = "output/content_tableDT.rds")
