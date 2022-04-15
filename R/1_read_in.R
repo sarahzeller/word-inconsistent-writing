@@ -18,18 +18,24 @@ contentDT <- contentDT[
   text != "", "text"
 ]
 
-# replace colon with space
-contentDT[, text := str_replace(text, ":", " ")]
+# replace colon so that it's the end of a sentence
+contentDT[, text := str_replace(text, ":", ". ")]
 
 ## unnest tokens to find words
-content_tidy <- unnest_tokens(contentDT, 
+content_tidyDT <- unnest_tokens(contentDT, 
                               words, 
                               text,
-                              to_lower = F)
+                              token = "sentences",
+                              to_lower = F) %>%
+  #figure out first word in sentence
+  mutate(word1 = sapply(strsplit(words, " "), `[`, 1)) %>%
+  #then into words
+  unnest_tokens(words, words, to_lower = F) 
+
+content_tidyDT[, first_word := grepl(words, word1), by = words]
+content_tidyDT[, word1 := NULL]
 
 ## create table of all words
-content_tableDT <- as.data.table(table(content_tidy,
-                                     dnn = "word"))[
-  order(-N, word)
-]
+content_tableDT <- content_tidyDT[, .N, by = .(words, first_word)]
+
 saveRDS(content_tableDT, file = "output/content_tableDT.rds")
