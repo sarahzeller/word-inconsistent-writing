@@ -23,19 +23,19 @@ contentDT[, text := str_replace(text, ":", ". ")]
 
 ## unnest tokens to find words
 content_tidyDT <- unnest_tokens(contentDT, 
-                              words, 
+                              word, 
                               text,
                               token = "sentences",
                               to_lower = F) %>%
   #figure out first word in sentence
-  mutate(word1 = sapply(strsplit(words, " "), `[`, 1)) %>%
+  mutate(word1 = sapply(strsplit(word, " "), `[`, 1)) %>%
   #then into words
-  unnest_tokens(words, words, to_lower = F) 
+  unnest_tokens(word, word, to_lower = F) 
 
-content_tidyDT[, first_word := grepl(words, word1), by = words]
+content_tidyDT[, first_word := grepl(word, word1), by = word]
 content_tidyDT[, word1 := NULL]
 
 ## create table of all words
-content_tableDT <- content_tidyDT[, .N, by = .(words, first_word)]
+content_tableDT <- content_tidyDT[, .N, by = .(word, first_word)]
 
 saveRDS(content_tableDT, file = "output/content_tableDT.rds")
