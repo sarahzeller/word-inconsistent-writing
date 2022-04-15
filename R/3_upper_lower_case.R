@@ -10,14 +10,20 @@ source("set-up.R")
 wordsDT <- readRDS("output/wordsDT.rds")
 
 #long to wide: check if a word is spelled with upper and lower case
-wordsDT[, uppercase := ifelse(uppercase == T, "uppercase", "lowercase")]
+wordsDT[, `:=`(uppercase = ifelse(uppercase == T, 
+                                  "uppercase", 
+                                  "lowercase"),
+               first_word = ifelse(first_word ==T, 
+                                        "start", 
+                                        "mid"))]
 upper_lowerDT <- dcast(wordsDT, 
-                       word ~ uppercase, 
+                       word  ~ uppercase + first_word, 
                        value.var = "N", 
                        fun.aggregate = sum,
-                       sep = "_")
+                       sep = "_", 
+                       drop = F)
 
 #exclude all which don't have both spellings
-upper_lowerDT <- upper_lowerDT[!(lowercase == 0 | uppercase == 0)]
+# upper_lowerDT <- upper_lowerDT[!(lowercase == 0 | uppercase == 0)]
 
 ##TODO: Check if there's a fullstop before the word.
