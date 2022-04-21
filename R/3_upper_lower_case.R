@@ -23,7 +23,13 @@ upper_lowerDT <- dcast(wordsDT,
                        sep = "_", 
                        drop = F)
 
-#exclude all which don't have both spellings
-# upper_lowerDT <- upper_lowerDT[!(lowercase == 0 | uppercase == 0)]
+#exclude upper after punctuation --> doesn't matter
+upper_lowerDT[, uppercase_start := NULL]
 
-##TODO: Check if there's a fullstop before the word.
+#exclude all which don't have both spellings after the first word of a sentence
+upper_lower_gapDT <- upper_lowerDT[!(lowercase_mid == 0 | uppercase_mid == 0)][
+  , lowercase_start := NULL
+]
+
+#TODO: figure out if a "-" precedes an uppercase word
+#TODO: figure out if an article precedes the uppercase word
