@@ -9,7 +9,7 @@
 source("set-up.R")
 
 ## read in file
-word_file <- read_docx("input/220222_Leo.docx")
+word_file <- read_docx("input/210721_Kili.docx")
 contentDT <- as.data.table(docx_summary(word_file))
 
 ## delete appendix and empty lines
