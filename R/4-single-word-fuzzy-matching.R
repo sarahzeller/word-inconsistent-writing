@@ -8,15 +8,23 @@
 
 # load libraries and words
 source("set-up.R")
-wordsDT <- readRDS("output/upper_lowerDT.rds")
+words_with_infoDT <- readRDS("output/upper_lowerDT.rds")
 
-# create a distance matrix
-names <- wordsDT$word
-d  <- adist(names,
-            ignore.case=TRUE, 
-            costs=c(i=1,d=1,s=2)) #i=insertion, d=deletion s=substitution)
-rownames(d) <- names
-colnames(d) <- names
-distDT <- as.data.table(d)
+library(stringdist)
+# build a DT in which all words are confronted with the other
+wordsDT <- words_with_infoDT[, "word"][
+  CJ(word1 = word,
+     word2 = word,
+     unique = TRUE)
+  # exclude words which are paired with themselves
+][word != word2][
+  # calculate distance between words
+  , dist := stringdist(word, word2)
+][
+  # exclude too large distances;
+  # TODO figure out a good distance
+  dist < 3
+]
+
 
 
