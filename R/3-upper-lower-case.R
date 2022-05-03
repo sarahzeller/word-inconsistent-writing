@@ -33,3 +33,4 @@ upper_lower_gapDT <- upper_lowerDT[!(lowercase_mid == 0 | uppercase_mid == 0)][
 
 #TODO: figure out if a "-" precedes an uppercase word
 #TODO: figure out if an article precedes the uppercase word
+saveRDS(upper_lowerDT, "output/upper_lowerDT.rds")
