@@ -6,7 +6,10 @@
 #last edit: 22/04/07
 #############################################
 
-source("set-up.R")
+# source("set-up.R")
+library(data.table)
+library(dplyr)
+library(dtplyr)
 wordsDT <- readRDS("output/wordsDT.rds")
 
 #long to wide: check if a word is spelled with upper and lower case
@@ -21,10 +24,11 @@ upper_lowerDT <- dcast(wordsDT,
                        value.var = "N", 
                        fun.aggregate = sum,
                        sep = "_", 
-                       drop = F)
+                       drop = F) 
 
 #exclude upper after punctuation --> doesn't matter
-upper_lowerDT[, uppercase_start := NULL]
+upper_lowerDT[, n := rowSums(.SD), .SDcols = names(upper_lowerDT)[-1]
+              ][, uppercase_start := NULL]
 
 #exclude all which don't have both spellings after the first word of a sentence
 upper_lower_gapDT <- upper_lowerDT[!(lowercase_mid == 0 | uppercase_mid == 0)][
