@@ -6,7 +6,9 @@
 #last edit: 22/04/07
 #############################################
 
-source("set-up.R")
+# source("set-up.R")
+library(data.table)
+library(tidytext)
 content_tableDT <- readRDS("output/content_tableDT.rds")
 
 ##check for upper and lower case

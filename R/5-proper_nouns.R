@@ -28,37 +28,65 @@ wordsDT <-
   filter(word < other_word) |>
   filter(nchar(word) > 2 & nchar(other_word) > 2) |>
   # kick out "an", "ab" similarities
-  filter(!check_start(word, other_word, c(2,2), c("aban", "anab"))) |> 
+  filter(!check_start(word, other_word, c(2,2), c("aban", "anab"))) |>
   # kick out "auf", "aus"
-  filter(!check_start(word, other_word, c(3,3), c("aufaus", "ausauf"))) |> 
+  filter(!check_start(word, other_word, c(3,3), c("aufaus", "ausauf"))) |>
   # kick out "an"/"auf", "aus"/"ab"
   filter(!(check_start(word, other_word, c(2,3), c("anauf", "abaus"))|
-           check_start(word, other_word, c(3,2), c("aufan", "ausab")))) |> 
+           check_start(word, other_word, c(3,2), c("aufan", "ausab")))) |>
   # kick out "vor", "ver"
-  filter(!check_start(word, other_word, c(3,3), c("vorver", "vervor"))) |> 
-  filter(!(check_end(word, other_word, c(-1, 1), c("en", "in"))|
-           check_end(word, other_word, c(1, -1), c("en", "in")))) |> 
+  filter(!check_start(word, other_word, c(3,3), c("vorver", "vervor"))) |>
+  # kick out gendered words
+  filter(!(check_end(word, other_word, c(-1, 1), c("in"))|
+           check_end(word, other_word, c(1, -1), c("in")))) |>
   # kick out "n"/"t" in the end
-  filter(!check_end(word, other_word, c(0, 0), 
-                    c("nt", "tn", "et", "te", "mr", "rm", "rs", "sr", "es", "se", "ms", "sm"))) |> 
+  filter(!check_end(word, other_word, c(0, 0),
+                    c("nt", "tn", "et", "te", "mr", "rm", "rs", "sr", "es", 
+                      "se", "ms", "sm", "sn", "ns"))) |>
   mutate(dist = ifelse(substr(word, 1, nchar(word)-1) == other_word |
                          substr(other_word, 1, nchar(other_word)-1) == word,
                        NA_integer_,
                        stringdist(word, other_word, 
                                   weight = c(d = .5, i = .5, s = 1, t = 1)))) |>
+  # check for different Genitiv (s/es)
   mutate(s_es = 
            (check_end(word, other_word, length = c(1, 0), c("ses", "ess")) |
-           check_end(word, other_word, length = c(0,1), c("ses", "ess"))) & dist == 1) |> 
+           check_end(word, other_word, length = c(0,1), c("ses", "ess"))) & dist <= 1) |> 
+  filter(!(s_es == TRUE &
+            check_end(word, other_word, length = c(-1,1), "ss") |
+             check_end(word, other_word, length = c(1, -1), "ss"))) |> 
   mutate(rn_ren = (str_detect(word, "ren") & str_detect(other_word, "rn")|
-                     str_detect(word, "rn") & str_detect(other_word, "ren")) & dist == 1) |> 
+                     str_detect(word, "rn") & str_detect(other_word, "ren")) & dist <= 1) |> 
   mutate(t_z = (str_detect(word, "nt") & str_detect(other_word, "nz")|
-           str_detect(word, "nz") & str_detect(other_word, "nt")) & dist == 1 &
-           !str_detect(word, "nt$") & !str_detect(word, "nz$")) |> 
+           str_detect(word, "nz") & str_detect(other_word, "nt")) & dist <= 1 &
+           !(str_detect(word, "nt$") | !str_detect(word, "nz$"))) |> 
   mutate(diff_s = dist == 0.5 & 
            (!str_detect(word, "st$") & !str_detect(other_word, "st$")) &
            (str_count(word, "s") != str_count(other_word, "s"))) |> 
   mutate(diff_e = dist == 0.5 & 
            (str_count(word, "e") != str_count(other_word, "e"))) |> 
+  # kick out if "ge" somewhere within the word is the difference
+  filter(!(str_count(word, "ge") != str_count(other_word, "ge") &
+             dist == 1)) |> 
+  # kick out if difference is at the end of the word only
+  filter(!(check_end(word, other_word, length = c(-1, 1),
+                     c("er", "em", "st", "et", "te", "so", "zu", "re")) &
+           dist == 1)) |>
+  # kick out "n"/"ung"
+  filter(!(check_end(word, other_word, length = c(0, 2), c("nung", "ungn")) &
+             dist == 1)) |>
+  # kick out "er"/"et"
+  filter(!(check_end(word, other_word, length = c(1,1), c("eret", "eter")) &
+           dist == 1)) |>
+  # kick out "en"/"ten"
+  filter(!(check_end(word, other_word, length = c(1, 2), c("tenen", "enten")) &
+           dist == 0.5)) |> 
+  # kick out "daraus"/"darauf"
+  filter(!(c(word %in% c("daraus", "darauf") & 
+             other_word %in% c("daraus", "darauf")))) |> 
+  # kick out "zwei"/"zeit"
+  filter(!(word %in% c("zeit", "zweit") &
+             other_word %in% c("zeit", "zweit"))) |> 
   collect()
 
 
@@ -75,13 +103,42 @@ interesting_words <-
         all.x = TRUE,
         by.x = "other_word",
         by.y = "word",
-        suffixes = c("", "_other")) |> 
+        suffixes = c("_other", "")) |> 
   mutate(first_word = ifelse(n >= n_other,
                             word,
                             other_word),
          second_word = ifelse(n >= n_other,
                               other_word,
-                              word))
+                              word)) |> 
+  mutate(first_word = ifelse(s_es == TRUE, paste0(first_word, "^32"), first_word)) |> 
+  mutate(second_word = ifelse(s_es == TRUE, paste0(second_word, "^32"), second_word)) 
 
 saveRDS(interesting_words |> select(first_word, second_word),
         "output/interesting_words.RDS")
+
+close_words <- wordsDT |> 
+  filter(dist <= 1 & nchar(word) > 3 & nchar(other_word) > 4) |> 
+  filter(s_es == FALSE & rn_ren == FALSE & t_z == FALSE & diff_s == FALSE & 
+           diff_e == FALSE) |> 
+  filter(!(check_end(word, other_word, length = c(-1, 1),
+                     c("en", "es", "de")) &
+             dist == 1)) |>
+  collect() |> 
+  merge(words_with_infoDT |> select(word, n), 
+        all.x = TRUE,
+        by = "word") |> 
+  merge(words_with_infoDT |> select(word, n),
+        all.x = TRUE,
+        by.x = "other_word",
+        by.y = "word",
+        suffixes = c("_other", "")) |> 
+  mutate(first_word = ifelse(n >= n_other,
+                             word,
+                             other_word),
+         second_word = ifelse(n >= n_other,
+                              other_word,
+                              word)) |> 
+  arrange(dist) 
+
+saveRDS(close_words |> select(first_word, second_word),
+        "output/close_words.RDS")

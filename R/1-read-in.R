@@ -6,17 +6,21 @@
 #last edit: 22/03/28
 #############################################
 
-source("set-up.R")
+library(officer)
+library(data.table)
+library(tidytext)
+library(tidyverse)
 
 ## read in file
-word_file <- read_docx("input/210721_Kili.docx")
+word_file <- read_docx(input)
 contentDT <- as.data.table(docx_summary(word_file))
 
 ## delete appendix and empty lines
-contentDT <- contentDT[
-  1:(which(text == "Literaturverzeichnis")-2)][
-  text != "", "text"
-]
+contentDT <- contentDT[1:(ifelse("Literaturverzeichnis" %in% contentDT$text,
+                                 which(text == "Literaturverzeichnis")-2,
+                                 nrow(contentDT)))
+            ][text != "", "text"
+              ]
 
 # replace colon so that it's the end of a sentence
 contentDT[, text := str_replace(text, ":", ". ")]
@@ -26,14 +30,18 @@ content_tidyDT <- unnest_tokens(contentDT,
                               word, 
                               text,
                               token = "sentences",
-                              to_lower = F) %>%
+                              to_lower = F) |> 
   #figure out first word in sentence
-  mutate(word1 = sapply(strsplit(word, " "), `[`, 1)) %>%
+  mutate(word1 = sapply(strsplit(word, " "), `[`, 1)) |> 
   #then into words
-  unnest_tokens(word, word, to_lower = F) 
-
-content_tidyDT[, first_word := grepl(word, word1), by = word]
-content_tidyDT[, word1 := NULL]
+  unnest_tokens(word, word, to_lower = F) |> 
+  # kick out weird stuff
+  filter(nchar(word) < 35,
+         !str_detect(word, c("ADDIN", "CitaviPlaceholder", "VDI", "Zotero"))) |>  
+  # group_by(word) |> 
+  mutate(first_word = str_detect(word1, word)) |> 
+  # ungroup() |> 
+  select(-word1) 
 
 ## create table of all words
 content_tableDT <- content_tidyDT[, .N, by = .(word, first_word)]
