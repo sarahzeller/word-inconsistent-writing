@@ -18,4 +18,5 @@ source("R/5-filter_words.R")
 source("R/6-print_word.R")
 
 shell("start output/inconsistent_words.docx", wait = FALSE)
+shell("start input/stop_combinations.docx", wait = FALSE)
 
