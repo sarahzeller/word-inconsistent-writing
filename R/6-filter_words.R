@@ -19,8 +19,6 @@ stop_words <- read_docx("input/stop_combinations.docx") |>
 wordsDT <- wordsDT |> 
   anti_join(stop_words, by = c("word", "other_word"))
 
-
-
 interesting_words <-
   wordsDT |> 
   filter(s_es == TRUE | rn_ren == TRUE | t_z == TRUE | diff_s == TRUE | 
@@ -72,3 +70,16 @@ close_words <- wordsDT |>
 
 saveRDS(close_words |> select(first_word, second_word),
         "output/close_words.RDS")
+
+
+readRDS("output/one_two.rds") |> 
+  anti_join(stop_words, 
+            by = c("two_words" = "word", "one_word" = "other_word")) |> 
+  mutate(first_word = ifelse(n1 >= n2,
+                             one_word,
+                             two_words),
+         second_word = ifelse(n1 >= n2,
+                              two_words,
+                              one_word)) |> 
+  saveRDS("output/one_two_filtered.rds")
+  

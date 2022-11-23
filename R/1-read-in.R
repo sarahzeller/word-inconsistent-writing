@@ -47,3 +47,23 @@ content_tidyDT <- unnest_tokens(contentDT,
 content_tableDT <- content_tidyDT[, .N, by = .(word, first_word)]
 
 saveRDS(content_tableDT, file = "output/content_tableDT.rds")
+
+## create ngrams with two words
+two_words <- unnest_tokens(contentDT, 
+                           word, 
+                           text,
+                           token = "sentences",
+                           to_lower = F) |> 
+  #figure out first word in sentence
+  mutate(begin_sentence = sapply(strsplit(word, " "), `[`, 1))  |> 
+  unnest_tokens(two_words,
+                word, 
+                token = "ngrams",
+                n = 2,
+                to_lower = F) |> 
+  mutate(first_word = sapply(strsplit(two_words, " "), `[`, 1) == begin_sentence) |> 
+  filter(nchar(two_words) < 40,
+         !str_detect(two_words, c("ADDIN", "CitaviPlaceholder", "VDI", "Zotero"))) |>  
+  drop_na() |> 
+  filter(!grepl("([0-9])", two_words))
+saveRDS(two_words, file = "output/two_words.rds")
