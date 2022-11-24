@@ -15,6 +15,7 @@ source("R/2-relevant-words.R")
 source("R/3-upper-lower-case.R")
 source("R/4-proper_nouns.R")
 source("R/5-two_words_one_word.R")
+source("R/5a_hyphens.R")
 source("R/6-filter_words.R")
 source("R/7-print_word.R")
 

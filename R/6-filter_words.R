@@ -71,15 +71,28 @@ close_words <- wordsDT |>
 saveRDS(close_words |> select(first_word, second_word),
         "output/close_words.RDS")
 
-
+# one two
 readRDS("output/one_two.rds") |> 
   anti_join(stop_words, 
             by = c("two_words" = "word", "one_word" = "other_word")) |> 
   mutate(first_word = ifelse(n1 >= n2,
-                             one_word,
-                             two_words),
+                             two_words,
+                             one_word),
          second_word = ifelse(n1 >= n2,
-                              two_words,
-                              one_word)) |> 
+                              one_word,
+                              two_words)) |> 
   saveRDS("output/one_two_filtered.rds")
   
+
+# hyphens
+  readRDS("output/hyphen_no_hyphen.rds") |> 
+  anti_join(stop_words,
+            by = c("hyphen" = "word", "no_hyphen_word" = "other_word")) |> 
+  mutate(first_word = ifelse(n_hyphen > n_no_hyphen,
+                             no_hyphen_word,
+                             hyphen),
+         second_word = ifelse(n_hyphen > n_no_hyphen,
+                              hyphen,
+                              no_hyphen_word)) |> 
+    select(first_word, second_word) |> 
+    saveRDS("output/hyphen_filtered.rds")

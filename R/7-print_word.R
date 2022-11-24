@@ -4,20 +4,19 @@ library(dplyr)
 words <- readRDS("output/interesting_words.RDS")
 next_best <- readRDS("output/close_words.RDS")
 one_two <- readRDS("output/one_two_filtered.RDS")
+hyphens <- readRDS("output/hyphen_filtered.RDS")
 
-text <- 
-"\u00AC" |> 
-paste0(paste(words |> pull(first_word), words |> pull(second_word), sep = "|"))
+to_text <- function(word_pair) {
+  "\u00AC" |> 
+  paste0(paste(word_pair |> pull(first_word), 
+               word_pair |> pull(second_word), 
+               sep = "|"))
+}
 
-text_next_best <- "\u00AC" |>
-  paste0(paste(next_best |> pull(first_word), next_best |> pull(second_word), sep = "|"))
-
-text_one_two <- one_two <- "\u00AC" |>
-  paste0(paste(one_two |> pull(first_word), one_two |> pull(second_word), sep = "|"))
-
-full_text <- c(text, 
-               "", "| next-best", "", text_next_best, 
-               "", "| one-two", "", text_one_two)
+full_text <- c(to_text(words), 
+               "", "| next-best", "", to_text(next_best), 
+               "", "| one-two", "", to_text(one_two),
+               "", "| hyphens", "", to_text(hyphens))
 
 doc_words <- read_docx() 
 doc_words <- body_add_par(doc_words,

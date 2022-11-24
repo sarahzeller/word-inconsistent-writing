@@ -4,10 +4,12 @@ library(dtplyr)
 two_words <- readRDS("output/two_words.rds")
 
 two_words <- two_words |> 
-  mutate(two_words = tolower(two_words)) |> 
+  # mutate(two_words = tolower(two_words)) |> 
+  mutate(two_words = paste0(substr(two_words, 1, 1) |> tolower(), 
+                           substr(two_words, 2, nchar(two_words)))) |> 
   group_by(two_words) |> 
   summarize(n2 = n()) |> 
-  mutate(no_space = gsub(" ", "", two_words) |> tolower()) |> 
+  mutate(no_space = gsub(" ", "", two_words |> tolower())) |> 
   distinct() |> 
   collect()
 

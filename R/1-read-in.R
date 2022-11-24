@@ -56,14 +56,40 @@ two_words <- unnest_tokens(contentDT,
                            to_lower = F) |> 
   #figure out first word in sentence
   mutate(begin_sentence = sapply(strsplit(word, " "), `[`, 1))  |> 
+  #ensure hyphen stays
+  mutate(word = str_replace_all(word, "-", "_")) |> 
+  collect() |> 
   unnest_tokens(two_words,
                 word, 
                 token = "ngrams",
                 n = 2,
-                to_lower = F) |> 
+                to_lower = F)  |> 
   mutate(first_word = sapply(strsplit(two_words, " "), `[`, 1) == begin_sentence) |> 
+  filter(!grepl("_", two_words)) |> 
   filter(nchar(two_words) < 40,
          !str_detect(two_words, c("ADDIN", "CitaviPlaceholder", "VDI", "Zotero"))) |>  
   drop_na() |> 
   filter(!grepl("([0-9])", two_words))
 saveRDS(two_words, file = "output/two_words.rds")
+
+# hyphen-words
+hyphens <- unnest_tokens(contentDT, 
+                        word, 
+                        text,
+                        token = "sentences",
+                        to_lower = F) |> 
+  #only keep hyphen words
+  mutate(word = str_replace_all(word, "-", "_")) |> 
+  unnest_tokens(word, word, to_lower = F) |> 
+  filter(grepl("_", word) & !grepl("^_|_$", word)) |> 
+  mutate(word = str_replace_all(word, "_", "-")) |>
+  # kick out weird stuff
+  filter(nchar(word) < 35,
+         !str_detect(word, "ADDIN"), 
+         !str_detect(word, "CitaviPlaceholder"), 
+         !str_detect(word, "VDI"), 
+         !str_detect(word, "Zotero"),
+         !grepl("([0-9])", word)) |> 
+  group_by(word) |> 
+  summarize(n_hyphen = n())
+saveRDS(hyphens, "output/hyphens.rds")
