@@ -27,7 +27,7 @@ hyphen_no_hyphen <- CJ(hyphen_word = hyphens[["no_hyphen"]],
   merge(y = no_hyphens,
         all.x = TRUE,
         by.x = "no_hyphen_word",
-        by.y = "lower_word") |> 
+        by.y = "lower_word")  |> 
   select(hyphen, n_hyphen, no_hyphen_word, n_no_hyphen)
 
 saveRDS(hyphen_no_hyphen,
