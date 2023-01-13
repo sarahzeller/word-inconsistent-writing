@@ -1,0 +1,37 @@
+library(data.table)
+library(dtplyr)
+library(dplyr)
+
+source("R/functions/read_combinations_from_word.R")
+abbreviations <- "input/common_inconsistencies.docx" |> 
+  read_combinations_from_word() |> 
+  mutate(word = trimws(word)) |> 
+  mutate(other_word_no_dot = gsub("\\.", "", other_word))
+wordsDT <- readRDS("output/wordsDT.rds")
+
+duplicates <-
+  abbreviations |>
+  # check for duplicates
+  mutate(dupl = tolower(word) %in% wordsDT$word &
+           tolower(other_word_no_dot) %in% wordsDT$word) |>
+  filter(dupl == TRUE) |>
+  # merge with word counts
+  merge(wordsDT |> select(word, N), 
+        by = "word") |> 
+  merge(wordsDT |> select(word, N),
+        by.x = "other_word_no_dot",
+        by.y = "word",
+        suffixes = c("", "_other")) |>
+  # clean up
+  select(-other_word_no_dot, -dupl) |> 
+  # ignore capitalization
+  group_by(word, other_word) |> 
+  summarize(N = sum(N), 
+            N_other = sum(N_other)) |> 
+  ungroup() |> 
+  # put in the right order
+  mutate(first_word = ifelse(N <= N_other, word, other_word),
+         second_word = ifelse(N <= N_other, other_word, word)) 
+
+saveRDS(duplicates,
+        "output/common_abbreviations.rds")

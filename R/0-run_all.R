@@ -18,6 +18,7 @@ source("R/5-two_words_one_word.R")
 source("R/6_hyphens.R")
 source("R/7-filter_words.R")
 source("R/8-print_word.R")
+source("R/8-common_abbreviations.R")
 
 shell("start output/inconsistent_words.docx", wait = FALSE)
 shell("start input/stop_combinations.docx", wait = FALSE)
