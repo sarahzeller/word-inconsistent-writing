@@ -47,7 +47,7 @@ wordsDT <-
                          substr(other_word, 1, nchar(other_word)-1) == word,
                        NA_integer_,
                        stringdist(word, other_word, 
-                                  weight = c(d = .5, i = .5, s = 1, t = 1)))) |>
+                                  weight = c(d = .5, i = .5, s = 1, t = .5)))) |>
   # check for different Genitiv (s/es)
   mutate(s_es = 
            (check_end(word, other_word, length = c(1, 0), c("ses", "ess")) |
