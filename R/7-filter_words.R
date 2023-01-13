@@ -2,20 +2,9 @@
 wordsDT <- readRDS("output/wordsDT.RDS")
 
 # read in stop words
-stop_words <- read_docx("input/stop_combinations.docx") |> 
-  docx_summary() |> 
-  as.data.table() |> 
-  filter(content_type == "paragraph") |> 
-  mutate(word1 = gsub("\\|.*", "", text)) |>
-  mutate(word1 = gsub("\u00AC", "", word1)) |>
-  mutate(word2 = gsub(".*\\|", "", text)) |>
-  collect() |> 
-  rowwise() |> 
-  mutate(word = min(word1, word2)) |>
-  mutate(other_word = max(word1, word2)) |>
-  select(word, other_word) 
-
-
+source("R/functions/read_combinations_from_word.R")
+stop_words <- read_combinations_from_word("input/stop_combinations.docx")
+ 
 wordsDT <- wordsDT |> 
   anti_join(stop_words, by = c("word", "other_word"))
 
