@@ -31,7 +31,14 @@ duplicates <-
   ungroup() |> 
   # put in the right order
   mutate(first_word = ifelse(N <= N_other, word, other_word),
-         second_word = ifelse(N <= N_other, other_word, word)) 
+         second_word = ifelse(N <= N_other, other_word, word)) |> 
+  # only replace abbreviations with dots when they do not directly follow parentheses
+  mutate(first_word = ifelse(grepl("\\.", first_word),
+                             paste0("^32", first_word),
+                             first_word),
+         second_word = ifelse(grepl("\\.", first_word),
+                              paste0("^32", second_word),
+                              second_word))
 
 saveRDS(duplicates,
         "output/common_abbreviations.rds")
