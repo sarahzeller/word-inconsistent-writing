@@ -5,6 +5,7 @@ words <- readRDS("output/interesting_words.RDS")
 next_best <- readRDS("output/close_words.RDS")
 one_two <- readRDS("output/one_two_filtered.RDS")
 hyphens <- readRDS("output/hyphen_filtered.RDS")
+common_abbr <- readRDS("output/common_abbreviations.RDS")
 
 to_text <- function(word_pair) {
   "\u00AC" |> 
@@ -16,7 +17,8 @@ to_text <- function(word_pair) {
 full_text <- c(to_text(words), 
                "", "| next-best", "", to_text(next_best), 
                "", "| one-two", "", to_text(one_two),
-               "", "| hyphens", "", to_text(hyphens))
+               "", "| hyphens", "", to_text(hyphens),
+               "", "| abbreviations", "", to_text(common_abbr))
 
 doc_words <- read_docx() 
 doc_words <- body_add_par(doc_words,
