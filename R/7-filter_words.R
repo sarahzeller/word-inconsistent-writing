@@ -1,15 +1,15 @@
 # read in words so far
-wordsDT <- readRDS("output/wordsDT.RDS")
+word_combinationsDT <- readRDS("output/word_combinationsDT.RDS")
 
 # read in stop words
 source("R/functions/read_combinations_from_word.R")
 stop_words <- read_combinations_from_word("input/stop_combinations.docx")
  
-wordsDT <- wordsDT |> 
+word_combinationsDT <- word_combinationsDT |> 
   anti_join(stop_words, by = c("word", "other_word"))
 
 interesting_words <-
-  wordsDT |> 
+  word_combinationsDT |> 
   filter(s_es == TRUE | rn_ren == TRUE | t_z == TRUE | diff_s == TRUE | 
            diff_e == TRUE) |> 
   collect() |> 
@@ -33,7 +33,7 @@ interesting_words <-
 saveRDS(interesting_words |> select(first_word, second_word),
         "output/interesting_words.RDS")
 
-close_words <- wordsDT |> 
+close_words <- word_combinationsDT |> 
   filter(dist <= 1 & nchar(word) > 3 & nchar(other_word) > 4) |> 
   filter(s_es == FALSE & rn_ren == FALSE & t_z == FALSE & diff_s == FALSE & 
            diff_e == FALSE) |> 

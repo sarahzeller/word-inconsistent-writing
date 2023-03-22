@@ -90,4 +90,4 @@ wordsDT <-
   collect()
 
 saveRDS(wordsDT,
-        "output/wordsDT.RDS")
+        "output/word_combinationsDT.RDS")
