@@ -24,6 +24,7 @@ contentDT <- contentDT[1:(ifelse("Literaturverzeichnis" %in% contentDT$text,
 
 # replace colon so that it's the end of a sentence
 contentDT[, text := str_replace(text, ":", ". ")]
+saveRDS(contentDT, "output/contentDT.rds")
 
 ## unnest tokens to find words
 content_tidyDT <- unnest_tokens(contentDT, 
