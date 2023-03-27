@@ -11,9 +11,6 @@ doc_acros <- lapply(1:length(acronyms$word),
                                                     style = "Normal"))
 
 
-if ("output_file" %in% ls() == FALSE) {
-  output_file <- "output/acro_list.docx"
-}
 
 print(doc_acros,
-      target = output_file)
+      target = "output/acro_list.docx")
