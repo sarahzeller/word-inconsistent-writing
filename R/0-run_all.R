@@ -20,6 +20,9 @@ source("R/7-filter_words.R")
 source("R/8-common_abbreviations.R")
 source("R/9-print_word.R")
 
+source("R/acronyms/find_acronyms.R")
+source("R/acronyms/print_acronyms.R")
+
 shell("start output/inconsistent_words.docx", wait = FALSE)
 shell("start input/stop_combinations.docx", wait = FALSE)
 
