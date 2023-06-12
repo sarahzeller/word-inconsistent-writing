@@ -65,12 +65,8 @@ two_words <- unnest_tokens(contentDT,
                 token = "ngrams",
                 n = 2,
                 to_lower = F)  |> 
-  mutate(first_word = sapply(strsplit(two_words, " "), `[`, 1) == begin_sentence) |> 
-  filter(!grepl("_", two_words)) |> 
-  filter(nchar(two_words) < 40,
-         !str_detect(two_words, c("ADDIN", "CitaviPlaceholder", "VDI", "Zotero"))) |>  
-  drop_na() |> 
-  filter(!grepl("([0-9])", two_words))
+  mutate(first_word = sapply(strsplit(two_words, " "), `[`, 1) == begin_sentence) 
+
 saveRDS(two_words, file = "output/two_words.rds")
 
 # hyphen-words

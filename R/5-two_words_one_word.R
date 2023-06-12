@@ -1,10 +1,11 @@
 library(tidyverse)
 library(data.table)
 library(dtplyr)
-two_words <- readRDS("output/two_words.rds")
-
-two_words <- two_words |> 
-  # mutate(two_words = tolower(two_words)) |> 
+two_words <- readRDS("output/two_words.rds") |> 
+  # filter only with hyphens
+  filter(!grepl("_", two_words)) |> 
+  drop_na() |> 
+  filter(!grepl("([0-9])", two_words)) |> 
   mutate(two_words = paste0(substr(two_words, 1, 1) |> tolower(), 
                            substr(two_words, 2, nchar(two_words)))) |> 
   group_by(two_words) |> 
