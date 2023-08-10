@@ -38,7 +38,8 @@ content_tidyDT <- unnest_tokens(contentDT,
   unnest_tokens(word, word, to_lower = F) |> 
   # kick out weird stuff
   filter(nchar(word) < 35,
-         !str_detect(word, c("ADDIN", "CitaviPlaceholder", "VDI", "Zotero"))) |>  
+         !str_detect(word, "ADDIN|CitaviPlaceholder|VDI|Zotero")
+         ) |>  
   # group_by(word) |> 
   mutate(first_word = str_detect(word1, word)) |> 
   # ungroup() |> 
@@ -82,10 +83,10 @@ hyphens <- unnest_tokens(contentDT,
   mutate(word = str_replace_all(word, "_", "-")) |>
   # kick out weird stuff
   filter(nchar(word) < 35,
-         !str_detect(word, "ADDIN"), 
-         !str_detect(word, "CitaviPlaceholder"), 
-         !str_detect(word, "VDI"), 
-         !str_detect(word, "Zotero"),
+         # !str_detect(word, "ADDIN"), 
+         # !str_detect(word, "CitaviPlaceholder"), 
+         # !str_detect(word, "VDI"), 
+         # !str_detect(word, "Zotero"),
          !grepl("([0-9])", word)) |> 
   group_by(word) |> 
   summarize(n_hyphen = n())
